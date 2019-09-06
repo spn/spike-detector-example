@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'maven-publish'
+    id 'com.adarshr.test-logger' version '1.7.0'
+    id "com.github.johnrengelman.shadow" version "5.0.0"
+}
+
+repositories {
+  mavenCentral()
+  jcenter()
+  maven {
+    url "http://packages.confluent.io/maven/"
+  }
+}
+
+dependencies {
+    compile 'org.apache.kafka:kafka-streams:2.3.0'
+    compile 'io.confluent.ksql:ksql-udf:5.3.0'
+    compile 'net.sf.jopt-simple:jopt-simple:5.0.4'
+}
+
+//customize ShadowJar
+jar.enabled = false
+shadowJar { classifier = '' }
+tasks.build.dependsOn tasks.shadowJar
+
+mainClassName = 'com.example.streams.ErrorSpikeDetector'
+
+// mavenLocal publish
+publishing {
+   publications {
+      shadow(MavenPublication) { publication ->
+         project.shadow.component(publication)
+      }
+   }
+   repositories {
+      mavenLocal()
+   }
+}
+group = 'com.example'
+version = '1.0.0'
